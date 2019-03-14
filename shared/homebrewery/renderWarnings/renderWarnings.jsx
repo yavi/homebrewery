@@ -1,21 +1,22 @@
 
 const React = require('react');
+const createClass = require('create-react-class');
 const _     = require('lodash');
 const cx    = require('classnames');
 
 const DISMISS_KEY = 'dismiss_render_warning';
 
-const RenderWarnings = React.createClass({
-	getInitialState: function() {
+const RenderWarnings = createClass({
+	getInitialState : function() {
 		return {
-			warnings: {}
+			warnings : {}
 		};
 	},
-	componentDidMount: function() {
+	componentDidMount : function() {
 		this.checkWarnings();
 		window.addEventListener('resize', this.checkWarnings);
 	},
-	componentWillUnmount: function() {
+	componentWillUnmount : function() {
 		window.removeEventListener('resize', this.checkWarnings);
 	},
 	warnings : {
@@ -24,40 +25,31 @@ const RenderWarnings = React.createClass({
 			if(!isChrome){
 				return <li key='chrome'>
 					<em>Built for Chrome </em> <br />
-					Other browsers do not support
+					Other browsers do not support &nbsp;
 					<a target='_blank' href='https://developer.mozilla.org/en-US/docs/Web/CSS/column-span#Browser_compatibility'>
 						key features
 					</a> this site uses.
 				</li>;
 			}
 		},
-		zoom : function(){
-			return false;
-			if(window.devicePixelRatio !== 1){
-				return <li key='zoom'>
-					<em>Your browser is zoomed. </em> <br />
-					This can cause content to jump columns.
-				</li>;
-			}
-		}
 	},
 	checkWarnings : function(){
 		const hideDismiss = localStorage.getItem(DISMISS_KEY);
-		if(hideDismiss) return this.setState({warnings : {}});
+		if(hideDismiss) return this.setState({ warnings: {} });
 
 		this.setState({
-			warnings : _.reduce(this.warnings, (r, fn, type) => {
+			warnings : _.reduce(this.warnings, (r, fn, type)=>{
 				const element = fn();
 				if(element) r[type] = element;
 				return r;
 			}, {})
-		})
+		});
 	},
 	dismiss : function(){
 		localStorage.setItem(DISMISS_KEY, true);
 		this.checkWarnings();
 	},
-	render: function(){
+	render : function(){
 		if(_.isEmpty(this.state.warnings)) return null;
 
 		return <div className='renderWarnings'>
@@ -66,7 +58,7 @@ const RenderWarnings = React.createClass({
 			<h3>Render Warnings</h3>
 			<small>If this homebrew is rendering badly if might be because of the following:</small>
 			<ul>{_.values(this.state.warnings)}</ul>
-		</div>
+		</div>;
 	}
 });
 

@@ -1,14 +1,15 @@
 const React = require('react');
+const createClass = require('create-react-class');
 const _     = require('lodash');
 const cx    = require('classnames');
 const moment = require('moment');
-const request = require("superagent");
+const request = require('superagent');
 
-const BrewItem = React.createClass({
-	getDefaultProps: function() {
+const BrewItem = createClass({
+	getDefaultProps : function() {
 		return {
 			brew : {
-				title : '',
+				title       : '',
 				description : '',
 
 				authors : []
@@ -17,29 +18,34 @@ const BrewItem = React.createClass({
 	},
 
 	deleteBrew : function(){
-		if(!confirm("are you sure you want to delete this brew?")) return;
-		if(!confirm("are you REALLY sure? You will not be able to recover it")) return;
+		if(this.props.brew.authors.length <= 1){
+			if(!confirm('Are you sure you want to delete this brew? Because you are the only owner of this brew, the document will be deleted permanently.')) return;
+			if(!confirm('Are you REALLY sure? You will not be able to recover the document.')) return;
+		} else {
+			if(!confirm('Are you sure you want to remove this brew from your collection? This will remove you as an editor, but other owners will still be able to access the document.')) return;
+			if(!confirm('Are you REALLY sure? You will lose editor access to this document.')) return;
+		}
 
-		request.get('/api/remove/' + this.props.brew.editId)
+		request.get(`/api/remove/${this.props.brew.editId}`)
 			.send()
 			.end(function(err, res){
 				location.reload();
 			});
 	},
 
-	renderDeleteBrewLink: function(){
+	renderDeleteBrewLink : function(){
 		if(!this.props.brew.editId) return;
 
 		return <a onClick={this.deleteBrew}>
 			<i className='fa fa-trash' />
-		</a>
+		</a>;
 	},
-	renderEditLink: function(){
+	renderEditLink : function(){
 		if(!this.props.brew.editId) return;
 
-		return <a href={`/edit/${this.props.brew.editId}`} target='_blank'>
+		return <a href={`/edit/${this.props.brew.editId}`} target='_blank' rel='noopener noreferrer'>
 			<i className='fa fa-pencil' />
-		</a>
+		</a>;
 	},
 
 	render : function(){
@@ -62,13 +68,13 @@ const BrewItem = React.createClass({
 			</div>
 
 			<div className='links'>
-				<a href={`/share/${brew.shareId}`} target='_blank'>
+				<a href={`/share/${brew.shareId}`} target='_blank' rel='noopener noreferrer'>
 					<i className='fa fa-share-alt' />
 				</a>
 				{this.renderEditLink()}
 				{this.renderDeleteBrewLink()}
 			</div>
-		</div>
+		</div>;
 	}
 });
 

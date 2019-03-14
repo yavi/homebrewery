@@ -1,4 +1,5 @@
 const React = require('react');
+const createClass = require('create-react-class');
 const _ = require('lodash');
 const cx = require('classnames');
 
@@ -13,76 +14,76 @@ const ErrorPage = require('./pages/errorPage/errorPage.jsx');
 const PrintPage = require('./pages/printPage/printPage.jsx');
 
 let Router;
-const Homebrew = React.createClass({
-	getDefaultProps: function() {
+const Homebrew = createClass({
+	getDefaultProps : function() {
 		return {
-			url : '',
+			url         : '',
 			welcomeText : '',
-			changelog : '',
-			version : '0.0.0',
-			account : null,
-			brew : {
-				title : '',
-				text : '',
-				shareId : null,
-				editId : null,
+			changelog   : '',
+			version     : '0.0.0',
+			account     : null,
+			brew        : {
+				title     : '',
+				text      : '',
+				shareId   : null,
+				editId    : null,
 				createdAt : null,
 				updatedAt : null,
 			}
 		};
 	},
-	componentWillMount: function() {
+	componentWillMount : function() {
 		global.account = this.props.account;
 		global.version = this.props.version;
 
 
 		Router = CreateRouter({
-			'/edit/:id' : (args) => {
+			'/edit/:id' : (args)=>{
 				if(!this.props.brew.editId){
-					return <ErrorPage errorId={args.id}/>
+					return <ErrorPage errorId={args.id}/>;
 				}
 
 				return <EditPage
 					id={args.id}
-					brew={this.props.brew} />
+					brew={this.props.brew} />;
 			},
 
-			'/share/:id' : (args) => {
+			'/share/:id' : (args)=>{
 				if(!this.props.brew.shareId){
-					return <ErrorPage errorId={args.id}/>
+					return <ErrorPage errorId={args.id}/>;
 				}
 
 				return <SharePage
 					id={args.id}
-					brew={this.props.brew} />
+					brew={this.props.brew} />;
 			},
-			'/user/:username' : (args) => {
+			'/user/:username' : (args)=>{
 				return <UserPage
 					username={args.username}
 					brews={this.props.brews}
-				/>
+				/>;
 			},
-			'/print/:id' : (args, query) => {
+			'/print/:id' : (args, query)=>{
 				return <PrintPage brew={this.props.brew} query={query}/>;
 			},
-			'/print' : (args, query) => {
+			'/print' : (args, query)=>{
 				return <PrintPage query={query}/>;
 			},
-			'/new' : (args) => {
-				return <NewPage />
+			'/new' : (args)=>{
+				return <NewPage />;
 			},
-			'/changelog' : (args) => {
+			'/changelog' : (args)=>{
 				return <SharePage
-					brew={{title : 'Changelog', text : this.props.changelog}} />
+					brew={{ title: 'Changelog', text: this.props.changelog }} />;
 			},
 			'*' : <HomePage
-					welcomeText={this.props.welcomeText} />,
+				welcomeText={this.props.welcomeText} />,
 		});
 	},
 	render : function(){
 		return <div className='homebrew'>
-			<Router initialUrl={this.props.url}/>
-		</div>
+			<Router defaultUrl={this.props.url}/>
+		</div>;
 	}
 });
 

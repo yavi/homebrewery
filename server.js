@@ -1,11 +1,12 @@
 const _ = require('lodash');
 const jwt = require('jwt-simple');
-const express = require("express");
+const express = require('express');
 const app = express();
 
-app.use(express.static(__dirname + '/build'));''
-app.use(require('body-parser').json({limit: '25mb'}));
+app.use(express.static(`${__dirname}/build`));
+app.use(require('body-parser').json({ limit: '25mb' }));
 app.use(require('cookie-parser')());
+app.use(require('./server/forcessl.mw.js'));
 
 const config = require('nconf')
 	.argv()
@@ -14,20 +15,21 @@ const config = require('nconf')
 	.file('defaults', { file: 'config/default.json' });
 
 //DB
-require('mongoose')
-	.connect(process.env.MONGODB_URI || process.env.MONGOLAB_URI || 'mongodb://localhost/naturalcrit')
-	.connection.on('error', () => {
-		console.log('Error : Could not connect to a Mongo Database.');
-		console.log('        If you are running locally, make sure mongodb.exe is running.');
-	});
+const mongoose = require('mongoose');
+mongoose.connect(config.get('mongodb_uri') || config.get('mongolab_uri') || 'mongodb://localhost/naturalcrit');
+mongoose.connection.on('error', ()=>{
+	console.log('Error : Could not connect to a Mongo Database.');
+	console.log('        If you are running locally, make sure mongodb.exe is running.');
+	throw 'Can not connect to Mongo';
+});
 
 
-//Account MIddleware
-app.use((req, res, next) => {
+//Account Middleware
+app.use((req, res, next)=>{
 	if(req.cookies && req.cookies.nc_session){
-		try{
+		try {
 			req.account = jwt.decode(req.cookies.nc_session, config.get('secret'));
-		}catch(e){}
+		} catch (e){}
 	}
 	return next();
 });
@@ -43,35 +45,35 @@ const changelogText = require('fs').readFileSync('./changelog.md', 'utf8');
 
 
 //Source page
-String.prototype.replaceAll = function(s,r){return this.split(s).join(r)}
+String.prototype.replaceAll = function(s, r){return this.split(s).join(r);};
 app.get('/source/:id', (req, res)=>{
-	HomebrewModel.get({shareId : req.params.id})
+	HomebrewModel.get({ shareId: req.params.id })
 		.then((brew)=>{
 			const text = brew.text.replaceAll('<', '&lt;').replaceAll('>', '&gt;');
-			return res.send(`<code><pre>${text}</pre></code>`);
+			return res.send(`<code><pre style="white-space: pre-wrap;">${text}</pre></code>`);
 		})
 		.catch((err)=>{
 			console.log(err);
 			return res.status(404).send('Could not find Homebrew with that id');
-		})
+		});
 });
 
 
-app.get('/user/:username', (req, res, next) => {
+app.get('/user/:username', (req, res, next)=>{
 	const fullAccess = req.account && (req.account.username == req.params.username);
 	HomebrewModel.getByUser(req.params.username, fullAccess)
-		.then((brews) => {
+		.then((brews)=>{
 			req.brews = brews;
 			return next();
 		})
-		.catch((err) => {
+		.catch((err)=>{
 			console.log(err);
-		})
-})
+		});
+});
 
 
 app.get('/edit/:id', (req, res, next)=>{
-	HomebrewModel.get({editId : req.params.id})
+	HomebrewModel.get({ editId: req.params.id })
 		.then((brew)=>{
 			req.brew = brew.sanatize();
 			return next();
@@ -84,7 +86,7 @@ app.get('/edit/:id', (req, res, next)=>{
 
 //Share Page
 app.get('/share/:id', (req, res, next)=>{
-	HomebrewModel.get({shareId : req.params.id})
+	HomebrewModel.get({ shareId: req.params.id })
 		.then((brew)=>{
 			return brew.increaseView();
 		})
@@ -100,7 +102,7 @@ app.get('/share/:id', (req, res, next)=>{
 
 //Print Page
 app.get('/print/:id', (req, res, next)=>{
-	HomebrewModel.get({shareId : req.params.id})
+	HomebrewModel.get({ shareId: req.params.id })
 		.then((brew)=>{
 			req.brew = brew.sanatize(true);
 			return next();
@@ -115,20 +117,20 @@ app.get('/print/:id', (req, res, next)=>{
 //Render Page
 const render = require('vitreum/steps/render');
 const templateFn = require('./client/template.js');
-app.use((req, res) => {
+app.use((req, res)=>{
 	render('homebrew', templateFn, {
-			version : require('./package.json').version,
-			url: req.originalUrl,
-			welcomeText : welcomeText,
-			changelog : changelogText,
-			brew : req.brew,
-			brews : req.brews,
-			account : req.account
+		version     : require('./package.json').version,
+		url         : req.originalUrl,
+		welcomeText : welcomeText,
+		changelog   : changelogText,
+		brew        : req.brew,
+		brews       : req.brews,
+		account     : req.account
+	})
+		.then((page)=>{
+			return res.send(page);
 		})
-		.then((page) => {
-			return res.send(page)
-		})
-		.catch((err) => {
+		.catch((err)=>{
 			console.log(err);
 			return res.sendStatus(500);
 		});

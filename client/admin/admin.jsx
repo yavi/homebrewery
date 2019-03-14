@@ -1,38 +1,33 @@
-var React = require('react');
-var _ = require('lodash');
-var cx = require('classnames');
+const React = require('react');
+const createClass = require('create-react-class');
 
-var HomebrewAdmin = require('./homebrewAdmin/homebrewAdmin.jsx');
 
-var Admin = React.createClass({
-	getDefaultProps: function() {
-		return {
-			url : "",
-			admin_key : "",
-			homebrews : [],
-		};
+const BrewCleanup = require('./brewCleanup/brewCleanup.jsx');
+const BrewLookup = require('./brewLookup/brewLookup.jsx');
+const Stats = require('./stats/stats.jsx');
+
+const Admin = createClass({
+	getDefaultProps : function() {
+		return {};
 	},
 
 	render : function(){
-		var self = this;
-		return(
-			<div className='admin'>
+		return <div className='admin'>
 
-				<header>
-					<div className='container'>
-						<i className='fa fa-rocket' />
-						naturalcrit admin
-					</div>
-				</header>
-
+			<header>
 				<div className='container'>
-
-					<HomebrewAdmin homebrews={this.props.homebrews} admin_key={this.props.admin_key} />
+					<i className='fa fa-rocket' />
+					homebrewery admin
 				</div>
-
-
+			</header>
+			<div className='container'>
+				<Stats />
+				<hr />
+				<BrewLookup />
+				<hr />
+				<BrewCleanup />
 			</div>
-		);
+		</div>;
 	}
 });
 

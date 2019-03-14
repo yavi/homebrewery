@@ -1,11 +1,12 @@
-var React = require('react');
-var _ = require('lodash');
-var cx = require('classnames');
+const React = require('react');
+const createClass = require('create-react-class');
+const _ = require('lodash');
+const cx = require('classnames');
 
 
-var CodeMirror;
+let CodeMirror;
 if(typeof navigator !== 'undefined'){
-	var CodeMirror = require('codemirror');
+	CodeMirror = require('codemirror');
 
 	//Language Modes
 	require('codemirror/mode/gfm/gfm.js'); //Github flavoured markdown
@@ -13,23 +14,27 @@ if(typeof navigator !== 'undefined'){
 }
 
 
-var CodeEditor = React.createClass({
-	getDefaultProps: function() {
+const CodeEditor = createClass({
+	getDefaultProps : function() {
 		return {
-			language : '',
-			value : '',
-			wrap : false,
-			onChange : function(){},
+			language         : '',
+			value            : '',
+			wrap             : false,
+			onChange         : function(){},
 			onCursorActivity : function(){},
 		};
 	},
 
-	componentDidMount: function() {
-		this.codeMirror = CodeMirror(this.refs.editor,{
-			value : this.props.value,
-			lineNumbers: true,
+	componentDidMount : function() {
+		this.codeMirror = CodeMirror(this.refs.editor, {
+			value        : this.props.value,
+			lineNumbers  : true,
 			lineWrapping : this.props.wrap,
-			mode : this.props.language
+			mode         : this.props.language,
+			extraKeys    : {
+				'Ctrl-B' : this.makeBold,
+				'Ctrl-I' : this.makeItalic
+			}
 		});
 
 		this.codeMirror.on('change', this.handleChange);
@@ -37,13 +42,23 @@ var CodeEditor = React.createClass({
 		this.updateSize();
 	},
 
-	componentWillReceiveProps: function(nextProps){
+	makeBold : function() {
+		const selection = this.codeMirror.getSelection();
+		this.codeMirror.replaceSelection(`**${selection}**`, 'around');
+	},
+
+	makeItalic : function() {
+		const selection = this.codeMirror.getSelection();
+		this.codeMirror.replaceSelection(`*${selection}*`, 'around');
+	},
+
+	componentWillReceiveProps : function(nextProps){
 		if(this.codeMirror && nextProps.value !== undefined && this.codeMirror.getValue() != nextProps.value) {
 			this.codeMirror.setValue(nextProps.value);
 		}
 	},
 
-	shouldComponentUpdate: function(nextProps, nextState) {
+	shouldComponentUpdate : function(nextProps, nextState) {
 		return false;
 	},
 
@@ -66,7 +81,7 @@ var CodeEditor = React.createClass({
 	},
 
 	render : function(){
-		return <div className='codeEditor' ref='editor' />
+		return <div className='codeEditor' ref='editor' />;
 	}
 });
 

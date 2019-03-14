@@ -1,21 +1,22 @@
-var React = require('react');
-var _ = require('lodash');
-var cx = require('classnames');
+const React = require('react');
+const createClass = require('create-react-class');
+const _ = require('lodash');
+const cx = require('classnames');
 
-var NaturalCritIcon = require('naturalcrit/svg/naturalcrit.svg.jsx');
+const NaturalCritIcon = require('naturalcrit/svg/naturalcrit.svg.jsx');
 
-var Nav = {
-	base : React.createClass({
+const Nav = {
+	base : createClass({
 		render : function(){
 			return <nav>
 				<div className='navContent'>
 					{this.props.children}
 				</div>
-			</nav>
+			</nav>;
 		}
 	}),
 	logo : function(){
-		return <a className='navLogo' href="http://naturalcrit.com">
+		return <a className='navLogo' href='http://naturalcrit.com'>
 			<NaturalCritIcon />
 			<span className='name'>
 				Natural<span className='crit'>Crit</span>
@@ -23,32 +24,32 @@ var Nav = {
 		</a>;
 	},
 
-	section : React.createClass({
+	section : createClass({
 		render : function(){
 			return <div className='navSection'>
 				{this.props.children}
-			</div>
+			</div>;
 		}
 	}),
 
-	item : React.createClass({
-		getDefaultProps: function() {
+	item : createClass({
+		getDefaultProps : function() {
 			return {
-				icon : null,
-				href : null,
-				newTab : false,
+				icon    : null,
+				href    : null,
+				newTab  : false,
 				onClick : function(){},
-				color : null
+				color   : null
 			};
 		},
 		handleClick : function(){
 			this.props.onClick();
 		},
 		render : function(){
-			var classes = cx('navItem', this.props.color, this.props.className);
+			const classes = cx('navItem', this.props.color, this.props.className);
 
-			var icon;
-			if(this.props.icon) icon = <i className={'fa ' + this.props.icon} />;
+			let icon;
+			if(this.props.icon) icon = <i className={`fa ${this.props.icon}`} />;
 
 			const props = _.omit(this.props, ['newTab']);
 
@@ -56,12 +57,12 @@ var Nav = {
 				return <a {...props} className={classes} target={this.props.newTab ? '_blank' : '_self'} >
 					{this.props.children}
 					{icon}
-				</a>
-			}else{
+				</a>;
+			} else {
 				return <div {...props} className={classes} onClick={this.handleClick} >
 					{this.props.children}
 					{icon}
-				</div>
+				</div>;
 			}
 		}
 	}),
